@@ -1,0 +1,58 @@
+services:
+  api-gateway:
+    container_name: petclinic-api-gateway
+    build:
+      context: .
+      dockerfile: docker/api-gateway/Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - customers-service
+      - vets-service
+      - visits-service
+
+  customers-service:
+    container_name: petclinic-customers
+    build:
+      context: .
+      dockerfile: docker/customers-service/Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/petclinic
+      - DB_USER=petclinic
+      - DB_PASSWORD=petclinic
+
+  vets-service:
+    container_name: petclinic-vets
+    build:
+      context: .
+      dockerfile: docker/vets-service/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/petclinic
+      - DB_USER=petclinic
+
+  visits-service:
+    container_name: petclinic-visits
+    build:
+      context: .
+      dockerfile: docker/visits-service/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/petclinic
+      - DB_USER=petclinic
+
+  db:
+    container_name: petclinic-db
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=petclinic
+      - POSTGRES_PASSWORD=petclinic
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

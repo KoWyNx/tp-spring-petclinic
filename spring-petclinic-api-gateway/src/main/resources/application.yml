@@ -1,10 +1,10 @@
 app:
   customers:
-    uri: http://localhost:8082
+    uri: http://customers-service:8081
   vets:
-    uri: http://localhost:8083
+    uri: http://vets-service:8082
   visits:
-    uri: http://localhost:8084
+    uri: http://visits-service:8083
 
 wavefront:
   application:
@@ -23,6 +23,9 @@ spring:
         host-append: false
         port-append: false
         proto-append: false
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 5s
       routes:
         - id: vets-service
           uri: ${app.vets.uri}
@@ -30,18 +33,27 @@ spring:
             - Path=/api/vet/**
           filters:
             - StripPrefix=2
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5000
         - id: visits-service
           uri: ${app.visits.uri}
           predicates:
             - Path=/api/visit/**
           filters:
             - StripPrefix=2
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5000
         - id: customers-service
           uri: ${app.customers.uri}
           predicates:
             - Path=/api/customer/**
           filters:
             - StripPrefix=2
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5000
   zipkin:
     enabled: false
 
@@ -52,8 +64,14 @@ management:
         include: health, info, prometheus
   endpoint:
     health:
+      show-details: always
       probes:
         enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
   metrics:
     export:
       wavefront:
